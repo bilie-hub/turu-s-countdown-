@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trufena's Birthday Countdown!</title>
+    <style>
+        :root {
+            --bg-color: #f0f7ff;
+            --card-bg: #ffffff;
+            --primary-color: #ff477e;
+            --secondary-color: #ff85a2;
+            --accent-blue: #00b4d8;
+            --text-main: #2b2d42;
+            --text-muted: #6c757d;
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', sans-serif;
+        }
+
+        body {
+            background-color: var(--bg-color);
+            background: linear-gradient(135deg, #e0f2fe 0%, #fce7f3 100%);
+            color: var(--text-main);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .container {
+            text-align: center;
+            max-width: 550px;
+            width: 100%;
+            background: rgba(255, 255, 255, 0.8);
+            padding: 30px 20px;
+            border-radius: 24px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+            backdrop-filter: blur(10px);
+            border: 2px solid #ffffff;
+        }
+
+        .german-wish {
+            background: #fff3f5;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+            padding: 10px;
+            border-radius: 12px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            margin-bottom: 20px;
+            display: inline-block;
+        }
+
+        h1 {
+            font-size: 2.2rem;
+            font-weight: 800;
+            margin-bottom: 15px;
+            color: #4a0e4e;
+        }
+
+        .subtitle {
+            color: var(--text-main);
+            font-size: 1.1rem;
+            margin-bottom: 30px;
+            line-height: 1.4;
+        }
+
+        .subtitle span {
+            color: var(--primary-color);
+            font-weight: bold;
+        }
+
+        /* Countdown Grid */
+        .countdown-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+            margin-bottom: 30px;
+        }
+
+        .time-card {
+            background-color: var(--card-bg);
+            border-radius: 16px;
+            padding: 15px 5px;
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.04);
+            border: 1px solid rgba(0, 0, 0, 0.05);
+        }
+
+        .time-value {
+            font-size: 2.2rem;
+            font-weight: 800;
+            color: var(--primary-color);
+            line-height: 1;
+            margin-bottom: 5px;
+        }
+
+        .time-label {
+            font-size: 0.75rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            font-weight: bold;
+            letter-spacing: 1px;
+        }
+
+        /* Taunting Status Box */
+        .status-box {
+            background: #ffffff;
+            border-radius: 16px;
+            padding: 20px;
+            border-bottom: 5px solid var(--accent-blue);
+            text-align: center;
+            margin-bottom: 25px;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.02);
+        }
+
+        .status-box h3 {
+            font-size: 1.1rem;
+            color: #4a0e4e;
+            margin-bottom: 8px;
+            text-transform: uppercase;
+        }
+
+        .status-box p {
+            color: var(--text-main);
+            font-size: 1rem;
+            line-height: 1.4;
+            font-weight: 500;
+        }
+
+        .btn {
+            background: linear-gradient(90deg, var(--primary-color), var(--accent-blue));
+            color: #ffffff;
+            border: none;
+            padding: 14px 32px;
+            font-size: 1rem;
+            font-weight: bold;
+            border-radius: 30px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(255, 71, 126, 0.3);
+            transition: transform 0.2s;
+            text-transform: uppercase;
+        }
+
+        .btn:hover {
+            transform: scale(1.03);
+        }
+
+        #confetti-canvas {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            z-index: 999;
+            pointer-events: none;
+        }
+
+        @media (max-width: 480px) {
+            h1 { font-size: 1.8rem; }
+            .time-value { font-size: 1.6rem; }
+            .countdown-grid { gap: 6px; }
+        }
+    </style>
+</head>
+<body>
+
+    <canvas id="confetti-canvas"></canvas>
+
+    <div class="container">
+        <div class="german-wish">🇩🇪 Alles Gute zum Geburtstag!</div>
+
+        <h1 id="main-heading">Trufena's Kid Clock ⏰</h1>
+        
+        <div class="subtitle" id="sub-msg">
+            Counting down the last hours until <span>Trufena Wanjiku</span> finally catches up to <strong>William</strong>!
+        </div>
+
+        <div class="countdown-grid">
+            <div class="time-card">
+                <div class="time-value" id="days">00</div>
+                <div class="time-label">Days</div>
+            </div>
+            <div class="time-card">
+                <div class="time-value" id="hours">00</div>
+                <div class="time-label">Hours</div>
+            </div>
+            <div class="time-card">
+                <div class="time-value" id="minutes">00</div>
+                <div class="time-label">Mins</div>
+            </div>
+            <div class="time-card">
+                <div class="time-value" id="seconds">00</div>
+                <div class="time-label">Secs</div>
+            </div>
+        </div>
+
+        <div class="status-box">
+            <h3 id="status-title">Current Status: You are still a kid!</h3>
+            <p id="status-desc">William is already a full adult. Trufena is still a minor until midnight! No M-Pesa under your own ID yet! 😜</p>
+        </div>
+
+        <button class="btn" onclick="fireManualConfetti()">Remind Her!</button>
+    </div>
+
+    <script>
+        const targetDate = new Date('2026-06-08T00:00:00').getTime();
+
+        function updateCountdown() {
+            const now = new Date().getTime();
+            const difference = targetDate - now;
+
+            if (difference <= 0) {
+                document.getElementById('days').innerText = '00';
+                document.getElementById('hours').innerText = '00';
+                document.getElementById('minutes').innerText = '00';
+                document.getElementById('seconds').innerText = '00';
+                
+                document.getElementById('main-heading').innerText = "Finally An Adult! 🎉";
+                document.getElementById('sub-msg').innerHTML = "Welcome to the 18 club, <span>Trufena Wanjiku</span>! You are finally on William's level.";
+                document.getElementById('status-title').innerText = "Status: Level Unlocked!";
+                document.getElementById('status-desc').innerText = "No more jokes! You can now get your own Maisha Card, open your own bank account, and stop using your parents' M-Pesa. Happy Birthday!";
+                
+                startContinuousCelebration();
+                return;
+            }
+
+            const d = Math.floor(difference / (1000 * 60 * 60 * 24));
+            const h = Math.floor((difference % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((difference % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((difference % (1000 * 60)) / 1000);
+
+            document.getElementById('days').innerText = d < 10 ? '0' + d : d;
+            document.getElementById('hours').innerText = h < 10 ? '0' + h : h;
+            document.getElementById('minutes').innerText = m < 10 ? '0' + m : m;
+            document.getElementById('seconds').innerText = s < 10 ? '0' + s : s;
+        }
+
+        updateCountdown();
+        const timerInterval = setInterval(updateCountdown, 1000);
+
+        const canvas = document.getElementById('confetti-canvas');
+        const ctx = canvas.getContext('2d');
+        let particles = [];
+
+        function resizeCanvas() {
+            canvas.width = window.innerWidth;
+            canvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resizeCanvas);
+        resizeCanvas();
+
+        class ConfettiParticle {
+            constructor(x, y, isLeft) {
+                this.x = x;
+                this.y = y;
+                this.size = Math.random() * 8 + 4;
+                this.color = ['#ff477e', '#00b4d8', '#ffb703', '#9b5de5'][Math.floor(Math.random() * 4)];
+                this.speedX = isLeft ? Math.random() * 10 + 2 : Math.random() * -10 - 2;
+                this.speedY = Math.random() * -15 - 5;
+                this.gravity = 0.4;
+                this.rotation = Math.random() * 360;
+                this.rotationSpeed = Math.random() * 4 - 2;
+                this.opacity = 1;
+            }
+            update() {
+                this.speedY += this.gravity;
+                this.x += this.speedX;
+                this.y += this.speedY;
+                this.rotation += this.rotationSpeed;
+                if (this.y > canvas.height) this.opacity = 0;
+            }
+            draw() {
+                ctx.save();
+                ctx.translate(this.x, this.y);
+                ctx.rotate((this.rotation * Math.PI) / 180);
+                ctx.globalAlpha = this.opacity;
+                ctx.fillStyle = this.color;
+                ctx.fillRect(-this.size / 2, -this.size / 2, this.size, this.size);
+                ctx.restore();
+            }
+        }
+
+        function animateParticles() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            particles = particles.filter(p => p.opacity > 0);
+            particles.forEach(p => {
+                p.update();
+                p.draw();
+            });
+            requestAnimationFrame(animateParticles);
+        }
+        animateParticles();
+
+        function fireManualConfetti() {
+            for (let i = 0; i < 35; i++) {
+                particles.push(new ConfettiParticle(0, canvas.height * 0.8, true));
+            }
+            for (let i = 0; i < 35; i++) {
+                particles.push(new ConfettiParticle(canvas.width, canvas.height * 0.8, false));
+            }
+        }
+
+        let dynamicCelebration = null;
+        function startContinuousCelebration() {
+            if (!dynamicCelebration) {
+                dynamicCelebration = setInterval(fireManualConfetti, 2500);
+            }
+        }
+    </script>
+</body>
+</html>
