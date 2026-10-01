@@ -125,15 +125,15 @@ The lyric details are placeholders that sound specific. If this song is about so
 
 # Last Light (solo piano)
 
-`last_light_piano.mp3` is a separate, tragic solo-piano piece in D minor at 64 BPM, about 3:17 long. `piano.py` renders it the same way `render.py` builds the song above: no samples, deterministic output.
+`last_light_piano.mp3` is a separate, tragic solo-piano piece in D minor at 64 BPM, about 3:46 long. `piano.py` renders it the same way `render.py` builds the song above: no samples, deterministic output.
 
 | Time | Section | What happens |
 |---|---|---|
 | 0:00 | Intro | Falling two-note sighs over low chords |
 | 0:15 | Theme | The melody over a rolling left hand |
 | 0:45 | Theme again | Louder, with the melody doubled in octaves |
-| 1:16 | Rising | Crescendo; the left hand speeds up to sixteenths, and a scale run throws into the peak |
-| 1:46 | Breaking | The climax: high held notes in octaves with chords filling them, octave bass on 1 and 3, peaking on a high F twice |
-| 2:17 | Impact | One crashing D-minor chord across the whole keyboard, then silence |
-| 2:22 | What's left | The theme an octave higher with almost nothing under it |
-| 2:53 | Ending | Slows to a stop and ends on a single low, open D |
+| 1:16 | Climb | A full minute (16 bars) where everything rises. The bass walks up the scale one step per bar and then holds a low A. The melody's peak climbs from A4 to E6 and never falls back. The texture goes from a heartbeat pulse to eighths, then sixteenths, then sweeps on every beat. It starts soft and grows about 9 dB, finishing with a run up into the peak. |
+| 2:15 | Breaking | The climax: the climb lands on a full low chord. High held notes in octaves with chords filling them, octave bass on 1 and 3, peaking on a high F twice |
+| 2:45 | Impact | One crashing D-minor chord across the whole keyboard, then silence |
+| 2:50 | What's left | The theme an octave higher with almost nothing under it |
+| 3:22 | Ending | Slows to a stop and ends on a single low, open D |

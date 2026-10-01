@@ -5,7 +5,7 @@ Last Light - a tragic solo piano piece, synthesized from scratch.
     python3 ballad/piano.py          # writes ballad/last_light_piano.mp3
 
 D minor, 64 BPM with rubato. Shape: a quiet sighing intro, the theme twice,
-a two-stage build (Rising -> Breaking) that crests on a crashing D minor
+a minute-long climb into the climax (Breaking) that crests on a crashing D minor
 chord, a bar of silence, then the theme an octave higher with almost
 nothing under it, and a ritardando into one low open D.
 
@@ -28,6 +28,8 @@ NOTE = {n: i for i, n in enumerate(["C", "C#", "D", "Eb", "E", "F", "F#", "G", "
 
 
 def midi(name):
+    if isinstance(name, (int, np.integer)):
+        return int(name)
     pitch, octave = name[:-1], int(name[-1])
     return 12 * (octave + 1) + NOTE[pitch]
 
@@ -62,18 +64,54 @@ A_MEL = [
     [(0, "Bb4", 1.5), (1.5, "D5", .5), (2, "G5", 1.5), (3.5, "F5", .5)],
     [(0, "E5", 2), (2, "C#5", 2)],
 ]
-# Stage one of the build: climbing, ending in a scale run that throws into the peak.
-RISE_MEL = [
-    [(0, "F5", 1), (1, "Bb5", 1), (2, "A5", 1), (3, "F5", 1)],
-    [(0, "G5", 1.5), (1.5, "E5", .5), (2, "C6", 2)],
-    [(0, "C6", 1), (1, "B5", .5), (1.5, "A5", .5), (2, "E5", 2)],
-    [(0, "F5", 1), (1, "A5", 1), (2, "D6", 2)],
-    [(0, "D6", 1.5), (1.5, "C6", .5), (2, "Bb5", 1), (3, "G5", 1)],
-    [(0, "F5", 1), (1, "Bb5", 1), (2, "D6", 2)],
-    [(0, "A5", 1), (1, "D6", 3)],
-    [(0, "C#6", 2), (2, "E5", .5), (2.5, "F5", .5), (3, "G5", .25), (3.25, "A5", .25),
-     (3.5, "Bb5", .25), (3.75, "C#6", .25)],
+# The climb: sixteen bars (about a minute) where everything rises at once.
+# The bass walks up the D minor scale a step per bar, then sits on a low A pedal;
+# every bar the melody peaks higher than the last; the hands go from a
+# heartbeat pulse to eighths to sixteenths; and it grows from soft to full.
+CLIMB = [  # (chord name, left-hand voicing low -> high)
+    ("Dm", [38, 45, 50, 53, 57]), ("C/E", [40, 48, 52, 55, 60]), ("F", [41, 48, 53, 57, 60]),
+    ("Gm", [43, 50, 55, 58, 62]), ("Dm/A", [45, 50, 53, 57, 62]), ("Bb", [46, 53, 58, 62, 65]),
+    ("C", [48, 55, 60, 64, 67]), ("A/C#", [49, 52, 57, 61, 64]),
+    ("Dm/D3", [50, 57, 62, 65, 69]), ("Em7b5", [52, 58, 62, 64, 67]), ("F/F3", [53, 60, 65, 69, 72]),
+    ("Gm/G3", [55, 62, 67, 70, 74]),
+    ("Asus4/A2", [45, 52, 57, 62, 64]), ("A/A2", [45, 52, 57, 61, 64]), ("A7/A2", [45, 52, 55, 61, 64]),
+    ("A7b9/A2", [45, 52, 55, 58, 61]),
 ]
+CHORDS.update({name: v for name, v in CLIMB})
+CLIMB_LH = ["pulse"] * 4 + ["arp"] * 8 + ["arp16"] * 4
+
+
+def climb_melody():
+    """Right hand for the climb, generated so each bar's peak is higher than the last."""
+    bars, top = [], 64
+    for k, (_, v) in enumerate(CLIMB):
+        pcs = {p % 12 for p in v}
+        tones = [m for m in range(55, 92) if m % 12 in pcs]
+        goal = 69 + (85 - 69) * k / (len(CLIMB) - 1)              # A4 rising to C#6
+        top = min((m for m in tones if m >= top), key=lambda m: abs(m - goal))  # never falls back
+        below = [m for m in tones if m < top][::-1]                 # nearest first
+        if k < 4:      # three rising quarter notes into a held peak
+            notes = [(0, below[1], 1), (1, below[0], 1), (2, top, 2)]
+        elif k < 8:    # four rising eighths into the peak
+            notes = [(i * .5, below[3 - i], .5) for i in range(4)] + [(2, top, 2)]
+        elif k < 12:   # a held low note, then a sixteenth-note rush up to the peak
+            notes = [(0, below[4], 1)] + [(1 + i * .25, below[3 - i], .25) for i in range(4)] + [(2, top, 2)]
+        elif k < 15:   # sweeps on every beat, each one reaching a little higher
+            notes = []
+            peaks = [m for m in tones if m <= top][-4:]               # beat by beat up to the peak
+            for j, pk in enumerate(peaks):
+                run = [m for m in tones if m < pk][-3:] + [pk]
+                notes += [(j + i * .25, m, .25 if i < 3 else .75) for i, m in enumerate(run)]
+        else:          # last bar: one sweep, then a melodic-minor run up into the peak
+            run = [m for m in tones if m < 81][-3:] + [81]
+            notes = [(i * .25, m, .25) for i, m in enumerate(run)] + [(1, 81, 1)]
+            notes += [(2 + i * .25, midi(n), .25) for i, n in
+                      enumerate(["C#5", "D5", "E5", "F5", "G5", "A5", "B5", "C#6"])]
+        bars.append(notes)
+    return bars
+
+
+CLIMB_MEL = climb_melody()
 # Stage two: the peak. Long held notes high up, in octaves with chord tones under them.
 BREAK_MEL = [
     [(0, "D6", 1.5), (1.5, "C6", .5), (2, "Bb5", 1), (3, "F5", 1)],
@@ -94,8 +132,8 @@ SECTIONS = [
     dict(name="Theme", chords=A_CHORDS, mel=A_MEL, mv=(.58, .62), lv=(.42, .44), lh="arp"),
     dict(name="Theme again", chords=A_CHORDS, mel=A_MEL, mv=(.62, .70), lv=(.44, .50), lh="arp",
          octaves=True),
-    dict(name="Rising", chords=B_CHORDS, mel=RISE_MEL, mv=(.68, .88), lv=(.50, .72),
-         lh=["arp"] * 6 + ["arp16"] * 2, octaves=True, bass=True),
+    dict(name="Climb", chords=[c for c, _ in CLIMB], mel=CLIMB_MEL, mv=(.46, .82), lv=(.36, .70),
+         lh=CLIMB_LH, octaves="peaks", bass="from8"),
     dict(name="Breaking", chords=B_CHORDS, mel=BREAK_MEL, mv=(.92, 1.0), lv=(.74, .86), lh="arp16",
          octaves=True, bass=True, harmony=True),
     dict(name="Impact", chords=["Dm"], mel=[[]], mv=(1, 1), lv=(1, 1), lh="impact"),
@@ -109,6 +147,8 @@ def tempo(sec, i):
     """Beat length for bar i of a section: phrase-end breaths and ritardandos."""
     name, last = sec["name"], i == len(sec["chords"]) - 1
     slow = 1.0 + (0.035 if i % 4 == 3 else 0.0)
+    if name == "Climb":
+        slow = 1.0 - 0.05 * i / 15 + (0.12 if last else 0.0)
     if name == "Breaking" and last:
         slow += 0.10
     if name == "Impact":
@@ -152,13 +192,10 @@ def piano_note(rng, m, vel, hold):
     return (out / 3 + thump) * env * vel ** 1.2 * (1 + 0.8 * low)
 
 
-def harmony_note(chord, m):
-    """Highest chord tone a third to a sixth below the melody note."""
+def harmony_notes(chord, m):
+    """The two highest chord tones a third or more below the melody, inside the octave."""
     pcs = {p % 12 for p in CHORDS[chord]}
-    for c in range(m - 3, m - 10, -1):
-        if c % 12 in pcs:
-            return c
-    return None
+    return [c for c in range(m - 3, m - 12, -1) if c % 12 in pcs][:2]
 
 
 def main():
@@ -192,6 +229,9 @@ def main():
                 play(t0 + .015, m, v, 1.6 * bl)
         elif ch:
             v = CHORDS[ch]
+            if s["name"] == "Breaking" and i == 0:     # the climb lands: a full chord in the low end
+                for m in (v[0] - 24, v[0] - 12, v[1], v[2]):
+                    play(t0, m, 1.0, 3 * bl)
             if lh == "arp":                             # pedal held through the bar
                 for k, idx in enumerate(ARP8):
                     play(t0 + k * bl / 2, v[idx], lv * (1.15 if k == 0 else 1), (8 - k) * bl / 2 + .2)
@@ -200,14 +240,20 @@ def main():
                 for k, idx in enumerate(ARP16):
                     acc = 1.15 if k % 4 == 0 else .9
                     play(t0 + k * bl / 4, ext[idx], lv * acc, (16 - k) * bl / 4 + .2)
+            elif lh == "pulse":                         # a heartbeat: bass, then soft chords on 2, 3, 4
+                play(t0, v[0], lv * 1.1, 4 * bl)
+                for beat in (1, 2, 3):
+                    for m in v[2:]:
+                        play(t0 + beat * bl, m, lv * (.62 if beat == 1 else .5), .8 * bl)
             else:
                 play(t0, v[0], lv * 1.1, 4 * bl)
                 play(t0 + bl, v[2], lv * .8, 3 * bl)
                 play(t0 + 2 * bl, v[3], lv * .75, 2 * bl)
                 play(t0 + 3 * bl, v[4], lv * .7, bl + .3)
-            if s.get("bass"):                            # octave bass on 1 (and 3 at the peak)
+            bass = s.get("bass")
+            if bass is True or (bass == "from8" and i >= 8):  # octave bass on 1 (and 3 when driving)
                 play(t0, v[0] - 12, lv, 4 * bl)
-                if s.get("harmony"):
+                if s.get("harmony") or lh == "arp16":
                     play(t0 + 2 * bl, v[0] - 12, lv * .85, 2 * bl)
         elif s["name"] == "Ending":
             play(t0, midi("D2"), .52, 8.0)              # the last thing: a low, open D
@@ -218,11 +264,10 @@ def main():
             vel = mv * (1.1 if beat in (0, 2) else 1.0)
             hold = dur * bl + .15
             play(t0 + beat * bl, m, vel, hold)
-            if s.get("octaves"):
+            if s.get("octaves") is True or (s.get("octaves") == "peaks" and dur >= .75):
                 play(t0 + beat * bl + .012, m - 12, vel * .78, hold)
-            if s.get("harmony") and beat in (0, 2) and dur >= 1:
-                h = harmony_note(ch, m)              # fills the octave with a chord tone
-                if h:
+            if s.get("harmony") and dur >= .5:      # fill the octave with chord tones
+                for h in harmony_notes(ch, m):
                     play(t0 + beat * bl + .02, h, vel * .65, hold)
 
     dry = np.stack([pan_l, pan_r], axis=1).astype(np.float64)
