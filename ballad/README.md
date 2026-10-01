@@ -120,3 +120,20 @@ This is a synthesized demo: a complete arrangement, harmony and topline, rendere
 - record the vocal, which is the song
 
 The lyric details are placeholders that sound specific. If this song is about something real, replace every one of them with your own details. Those details are the only part of this lane (Joji / late-night Weeknd / Juice WRLD) that can't be copied.
+
+---
+
+# Last Light (solo piano)
+
+`last_light_piano.mp3` is a separate, tragic solo-piano piece in D minor at 64 BPM, about 3:17 long. `piano.py` renders it the same way `render.py` builds the song above: no samples, deterministic output.
+
+| Time | Section | What happens |
+|---|---|---|
+| 0:00 | Intro | Falling two-note sighs over low chords |
+| 0:15 | Theme | The melody over a rolling left hand |
+| 0:45 | Theme again | Louder, with the melody doubled in octaves |
+| 1:16 | Rising | Crescendo; the left hand speeds up to sixteenths, and a scale run throws into the peak |
+| 1:46 | Breaking | The climax: high held notes in octaves with chords filling them, octave bass on 1 and 3, peaking on a high F twice |
+| 2:17 | Impact | One crashing D-minor chord across the whole keyboard, then silence |
+| 2:22 | What's left | The theme an octave higher with almost nothing under it |
+| 2:53 | Ending | Slows to a stop and ends on a single low, open D |
